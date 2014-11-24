@@ -109,7 +109,7 @@ namespace ChristmasGift
             }
 
 
-            // spawn snowflake as appopriate
+
             elapsedSpawnMilliseconds += gameTime.ElapsedGameTime.Milliseconds;
             if (elapsedSpawnMilliseconds >= TOTAL_SPAWN_MILLISECONDS)
             {
