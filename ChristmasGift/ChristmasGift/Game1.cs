@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 
-namespace ChristmasGift
+namespace Sight
 {
     /// <summary>
     /// This is the main type for your game
@@ -30,7 +30,7 @@ namespace ChristmasGift
         Rectangle mainFrame;
 
         // constant values - types of snowflakes
-        const int NUM_SNOWFLAKES = 2;
+        const int NUM_SNOWFLAKES = 3;
         
         // sprites saved for efficiancy
         Texture2D snowflakeSprite;
@@ -46,6 +46,11 @@ namespace ChristmasGift
         // background music
         SoundEffectInstance backgroundMusic;
 
+        // changing cursor look
+        SpriteBatch cursorSprite;
+        Texture2D cursorTex;
+        Vector2 cursorPos;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -55,7 +60,7 @@ namespace ChristmasGift
             graphics.PreferredBackBufferWidth = WINDOW_WIDTH;
 
             // mouse visibility
-            IsMouseVisible = true;
+            IsMouseVisible = false;
         }
 
         /// <summary>
@@ -93,7 +98,11 @@ namespace ChristmasGift
             // Create a snowflake object
             int randomTexture = rand.Next(NUM_SNOWFLAKES);
             string assetName = "snowflake" + randomTexture;
-            snowflakeSprite = Content.Load<Texture2D>("snowflake2");  
+            snowflakeSprite = Content.Load<Texture2D>(assetName);  
+
+            // Load the cursor
+            cursorSprite = new SpriteBatch(GraphicsDevice);
+            cursorTex = Content.Load<Texture2D>("gunSight");
         }
 
         /// <summary>
@@ -116,12 +125,15 @@ namespace ChristmasGift
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
 
+            // Cursor update
+            cursorPos = new Vector2(Mouse.GetState().X - cursorTex.Width/2, Mouse.GetState().Y - cursorTex.Height/2);
+
+
             // Updating the snowflake
             foreach (Snowflakes snowflake in snowflakes)
             {
                 snowflake.Update();
             }
-
 
             // spawn snowflake as appopriate
             elapsedSpawnMilliseconds += gameTime.ElapsedGameTime.Milliseconds;
@@ -160,20 +172,22 @@ namespace ChristmasGift
         {
             GraphicsDevice.Clear(Color.White);
 
-            // Drawing snowflakes
+            // Drawing background and snowflakes
             spriteBatch.Begin();
 
             spriteBatch.Draw(background, mainFrame, Color.White);
 
-            spriteBatch.End();
-
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
             foreach (Snowflakes snowflake in snowflakes)
             {
                 snowflake.Draw(spriteBatch);
             }
 
             spriteBatch.End();
+
+            // Drawing cursor
+            cursorSprite.Begin();
+            cursorSprite.Draw(cursorTex, cursorPos, Color.White);
+            cursorSprite.End();
 
             base.Draw(gameTime);
         }
