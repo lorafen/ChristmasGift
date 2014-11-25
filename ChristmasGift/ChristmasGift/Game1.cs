@@ -25,6 +25,10 @@ namespace ChristmasGift
         const int WINDOW_WIDTH = 800;
         const int WINDOW_HEIGHT = 600;
 
+        // background texture
+        Texture2D background;
+        Rectangle mainFrame;
+
         // constant values - types of snowflakes
         const int NUM_SNOWFLAKES = 2;
         
@@ -36,9 +40,11 @@ namespace ChristmasGift
 
         // snowflake spawn support
         const float SNOWFLAKE_SPEED = 0.2F;
-        const int TOTAL_SPAWN_MILLISECONDS = 2000;
+        const int TOTAL_SPAWN_MILLISECONDS = 1000;
         int elapsedSpawnMilliseconds = 0;
 
+        // background music
+        SoundEffectInstance backgroundMusic;
 
         public Game1()
         {
@@ -74,12 +80,20 @@ namespace ChristmasGift
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            // load and start playing background music
+            SoundEffect backgroundMusicEffect = Content.Load<SoundEffect>("backgroundMusic");
+            backgroundMusic = backgroundMusicEffect.CreateInstance();
+            backgroundMusic.IsLooped = true;
+            backgroundMusic.Play();
+
+            // Load the background content
+            background = Content.Load<Texture2D>("background0");
+            mainFrame = new Rectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+
             // Create a snowflake object
             int randomTexture = rand.Next(NUM_SNOWFLAKES);
             string assetName = "snowflake" + randomTexture;
-            snowflakeSprite = Content.Load<Texture2D>(assetName);
-
-            
+            snowflakeSprite = Content.Load<Texture2D>("snowflake2");  
         }
 
         /// <summary>
@@ -144,16 +158,20 @@ namespace ChristmasGift
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.White);
 
             // Drawing snowflakes
             spriteBatch.Begin();
 
+            spriteBatch.Draw(background, mainFrame, Color.White);
+
+            spriteBatch.End();
+
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
             foreach (Snowflakes snowflake in snowflakes)
             {
                 snowflake.Draw(spriteBatch);
             }
-            
 
             spriteBatch.End();
 
