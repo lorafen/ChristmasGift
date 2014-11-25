@@ -30,7 +30,7 @@ namespace Sight
         Rectangle mainFrame;
 
         // constant values - types of snowflakes
-        const int NUM_SNOWFLAKES = 3;
+        const int NUM_SNOWFLAKES = 2;
         
         // sprites saved for efficiancy
         Texture2D snowflakeSprite;
@@ -40,7 +40,7 @@ namespace Sight
 
         // snowflake spawn support
         const float SNOWFLAKE_SPEED = 0.2F;
-        const int TOTAL_SPAWN_MILLISECONDS = 1000;
+        const int TOTAL_SPAWN_MILLISECONDS = 2000;
         int elapsedSpawnMilliseconds = 0;
 
         // background music
@@ -50,6 +50,13 @@ namespace Sight
         SpriteBatch cursorSprite;
         Texture2D cursorTex;
         Vector2 cursorPos;
+
+        // Game object
+        List<ChristmasStuff> christmasStuffs = new List<ChristmasStuff>();
+        Texture2D christmasTexture;
+        string baseSpriteName;
+        const float STUFF_SPEED = 0.3F;
+        const int NUM_STUFF = 9;
 
         public Game1()
         {
@@ -103,6 +110,16 @@ namespace Sight
             // Load the cursor
             cursorSprite = new SpriteBatch(GraphicsDevice);
             cursorTex = Content.Load<Texture2D>("gunSight");
+
+            // Initialize christmas list
+            for (int i = 0; i < NUM_STUFF; i++ )
+            {
+                baseSpriteName = "stuff" + rand.Next(NUM_STUFF);
+                christmasTexture = Content.Load<Texture2D>(baseSpriteName);
+
+                christmasStuffs.Add(new ChristmasStuff(Content, baseSpriteName, rand.Next(0, WINDOW_WIDTH),
+                    rand.Next(0, WINDOW_HEIGHT), WINDOW_WIDTH, WINDOW_HEIGHT));
+            }
         }
 
         /// <summary>
@@ -128,11 +145,16 @@ namespace Sight
             // Cursor update
             cursorPos = new Vector2(Mouse.GetState().X - cursorTex.Width/2, Mouse.GetState().Y - cursorTex.Height/2);
 
-
             // Updating the snowflake
             foreach (Snowflakes snowflake in snowflakes)
             {
                 snowflake.Update();
+            }
+
+            // Christmas stuff update
+            foreach (ChristmasStuff stuff in christmasStuffs)
+            {
+                stuff.Update();
             }
 
             // spawn snowflake as appopriate
@@ -141,12 +163,18 @@ namespace Sight
             {
                 elapsedSpawnMilliseconds = 0;
 
-                // Added a new constructor for providing sprote and velocity
+                // Added a new constructor for providing sprite and velocity
                 snowflakes.Add(new Snowflakes(snowflakeSprite, rand.Next(WINDOW_WIDTH  - snowflakeSprite.Width + 1),
                     -snowflakeSprite.Height / 2,
                     new Vector2(0, SNOWFLAKE_SPEED),
                     WINDOW_WIDTH,
                     WINDOW_HEIGHT));
+
+                // Added a new constructor for christmas stuff
+                christmasStuffs.Add(new ChristmasStuff(Content.Load<Texture2D>("stuff" + rand.Next(NUM_STUFF)), rand.Next(WINDOW_WIDTH - christmasTexture.Width),
+                    -christmasTexture.Height / 2,
+                    new Vector2(0, STUFF_SPEED),
+                    WINDOW_WIDTH, WINDOW_HEIGHT));
             }
 
             // check for snowflakes leaving window
@@ -158,8 +186,15 @@ namespace Sight
                 } 
             }
 
-            
-           
+
+            // check for stuff leaving window
+            foreach (ChristmasStuff stuff in christmasStuffs)
+            {
+                if (stuff.CollisionRectangle.Bottom > WINDOW_HEIGHT)
+                {
+                    stuff.Active = false;
+                }
+            }
 
             base.Update(gameTime);
         }
@@ -180,6 +215,11 @@ namespace Sight
             foreach (Snowflakes snowflake in snowflakes)
             {
                 snowflake.Draw(spriteBatch);
+            }
+
+            foreach (ChristmasStuff stuff in christmasStuffs)
+            {
+                stuff.Draw(spriteBatch);
             }
 
             spriteBatch.End();
