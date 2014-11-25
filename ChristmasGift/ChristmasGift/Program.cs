@@ -1,6 +1,6 @@
 using System;
 
-namespace Sight
+namespace ChristmasGift
 {
 #if WINDOWS || XBOX
     static class Program

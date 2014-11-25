@@ -44,13 +44,18 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="snowflake0.png">
-      <Name>snowflake0</Name>
+    <Compile Include="gunSight.png">
+      <Name>gunSight</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="snowflake0.png">
+      <Name>snowflake0</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
     <Compile Include="snowflake1.png">
       <Name>snowflake1</Name>
       <Importer>TextureImporter</Importer>
@@ -58,13 +63,6 @@
     </Compile>
     <Compile Include="snowflake2.png">
       <Name>snowflake2</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="gunSight.png">
-      <Name>gunSight</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
@@ -112,6 +110,28 @@
     </Compile>
     <Compile Include="stuff8.png">
       <Name>stuff8</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="lady0.png">
+      <Name>lady0</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="lady1.png">
+      <Name>lady1</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="lady2.png">
+      <Name>lady2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="lady3.png">
+      <Name>lady3</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>

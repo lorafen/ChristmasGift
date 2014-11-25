@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 
-namespace Sight
+namespace ChristmasGift
 {
     /// <summary>
     /// This is the main type for your game
@@ -58,6 +58,12 @@ namespace Sight
         const float STUFF_SPEED = 0.3F;
         const int NUM_STUFF = 9;
 
+        List<Student> students = new List<Student>();
+        Texture2D studentTexture;
+        string studentName;
+        const float STUDENT_SPEED = 0.4F;
+        const int NUM_STUDENT = 4;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -96,7 +102,7 @@ namespace Sight
             SoundEffect backgroundMusicEffect = Content.Load<SoundEffect>("backgroundMusic");
             backgroundMusic = backgroundMusicEffect.CreateInstance();
             backgroundMusic.IsLooped = true;
-            backgroundMusic.Play();
+            //backgroundMusic.Play();
 
             // Load the background content
             background = Content.Load<Texture2D>("background0");
@@ -111,15 +117,19 @@ namespace Sight
             cursorSprite = new SpriteBatch(GraphicsDevice);
             cursorTex = Content.Load<Texture2D>("gunSight");
 
-            // Initialize christmas list
-            for (int i = 0; i < NUM_STUFF; i++ )
-            {
-                baseSpriteName = "stuff" + rand.Next(NUM_STUFF);
-                christmasTexture = Content.Load<Texture2D>(baseSpriteName);
+            // Load the christmas stuff
+            baseSpriteName = "stuff" + rand.Next(NUM_STUFF);
+            christmasTexture = Content.Load<Texture2D>(baseSpriteName);
 
-                christmasStuffs.Add(new ChristmasStuff(Content, baseSpriteName, rand.Next(0, WINDOW_WIDTH),
-                    rand.Next(0, WINDOW_HEIGHT), WINDOW_WIDTH, WINDOW_HEIGHT));
-            }
+            christmasStuffs.Add(new ChristmasStuff(Content, baseSpriteName, rand.Next(0, WINDOW_WIDTH),
+                rand.Next(0, WINDOW_HEIGHT), WINDOW_WIDTH, WINDOW_HEIGHT));
+
+            // Load students
+            studentName = "lady" + rand.Next(NUM_STUDENT);
+            studentTexture = Content.Load<Texture2D>(studentName);
+
+            students.Add(new Student(Content, studentName, rand.Next(0, WINDOW_WIDTH),
+                rand.Next(0, WINDOW_HEIGHT), WINDOW_WIDTH, WINDOW_HEIGHT)); 
         }
 
         /// <summary>
@@ -157,6 +167,12 @@ namespace Sight
                 stuff.Update();
             }
 
+            // Students update
+            foreach (Student student in students)
+            {
+                student.Update();                
+            }
+
             // spawn snowflake as appopriate
             elapsedSpawnMilliseconds += gameTime.ElapsedGameTime.Milliseconds;
             if (elapsedSpawnMilliseconds >= TOTAL_SPAWN_MILLISECONDS)
@@ -175,6 +191,12 @@ namespace Sight
                     -christmasTexture.Height / 2,
                     new Vector2(0, STUFF_SPEED),
                     WINDOW_WIDTH, WINDOW_HEIGHT));
+
+                students.Add(new Student(Content.Load<Texture2D>("lady" + rand.Next(NUM_STUDENT)), rand.Next(WINDOW_WIDTH - studentTexture.Width),
+                    studentTexture.Height / 2,
+                    new Vector2(0, STUDENT_SPEED),
+                    WINDOW_WIDTH,
+                    WINDOW_HEIGHT));
             }
 
             // check for snowflakes leaving window
@@ -190,11 +212,21 @@ namespace Sight
             // check for stuff leaving window
             foreach (ChristmasStuff stuff in christmasStuffs)
             {
-                if (stuff.CollisionRectangle.Bottom > WINDOW_HEIGHT)
+                if (stuff.CollisionRectangle.Top > WINDOW_HEIGHT)
                 {
                     stuff.Active = false;
                 }
             }
+
+            // checj for student leaving window
+            foreach (Student student in students)
+            {
+                if (student.CollisionRectangle.Top > WINDOW_HEIGHT)
+                {
+                    student.Active = false;
+                }
+            }
+
 
             base.Update(gameTime);
         }
@@ -220,6 +252,11 @@ namespace Sight
             foreach (ChristmasStuff stuff in christmasStuffs)
             {
                 stuff.Draw(spriteBatch);
+            }
+
+            foreach (Student student in students)
+            {
+                student.Draw(spriteBatch);
             }
 
             spriteBatch.End();
