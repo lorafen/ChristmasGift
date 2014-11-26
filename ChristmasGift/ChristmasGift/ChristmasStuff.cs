@@ -6,6 +6,7 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace ChristmasGift
 {
@@ -119,6 +120,33 @@ namespace ChristmasGift
                 //BounceTopBottom();
                 //BounceLeftRight();
             }
+        }
+
+        /// <summary>
+        /// Method to check if object was shot down
+        /// </summary>
+        /// <param name="gameTime">the time of game</param>
+        /// <param name="mouse">the state of the mouse</param>
+        /// <returns>if true object was killed</returns>
+        public bool ShootDown(GameTime gameTime, MouseState mouse)
+        {
+            bool result = false;
+
+            // check if mouse coursor is on the object
+            if (drawRectangle.Contains(mouse.X, mouse.Y))
+            {
+                //
+                if (mouse.LeftButton == ButtonState.Pressed)
+                {
+                    result = true;
+                }
+            }
+            else
+            {
+                result = false;
+            }
+
+            return result;
         }
 
         /// <summary>

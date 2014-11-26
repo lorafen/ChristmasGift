@@ -64,6 +64,9 @@ namespace ChristmasGift
         const float STUDENT_SPEED = 0.4F;
         const int NUM_STUDENT = 4;
 
+        // field to keep track of game state
+        static GameState state;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -218,7 +221,7 @@ namespace ChristmasGift
                 }
             }
 
-            // checj for student leaving window
+            // check for student leaving window
             foreach (Student student in students)
             {
                 if (student.CollisionRectangle.Top > WINDOW_HEIGHT)
@@ -227,6 +230,20 @@ namespace ChristmasGift
                 }
             }
 
+
+            // check if the student is tracked, than shoot
+            MouseState currentMouseState = Mouse.GetState();
+
+            // kod czy myszka znajduje siê na studentce, jeœli tak 
+            // sprawdzamy czy jest wciœniêty lewy klawisz myszki
+            // studentka umiera - mo¿na zostawiæ œlad po kuli, sygna³ dŸwiêkowy i znika z ekranu
+            foreach (Student student in students)
+            {
+                if (student.ShootDown(gameTime, currentMouseState))
+                {
+                    student.Active = false;
+                }
+            }
 
             base.Update(gameTime);
         }
