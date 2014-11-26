@@ -26,7 +26,7 @@ namespace ChristmasGift
         const int WINDOW_HEIGHT = 600;
 
         // background texture
-        Texture2D background;
+        Texture2D background, instructionBackground;
         Rectangle mainFrame;
 
         // constant values - types of snowflakes
@@ -45,6 +45,8 @@ namespace ChristmasGift
 
         // background music
         SoundEffectInstance backgroundMusic;
+        // other sound effects
+        SoundEffect shoot;
 
         // changing cursor look
         SpriteBatch cursorSprite;
@@ -66,6 +68,9 @@ namespace ChristmasGift
 
         // field to keep track of game state
         static GameState state;
+
+        // menu
+        Menu mainMenu;
 
         public Game1()
         {
@@ -101,14 +106,21 @@ namespace ChristmasGift
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            // initialize menu object
+            mainMenu = new Menu(Content, WINDOW_WIDTH, WINDOW_HEIGHT);
+
             // load and start playing background music
             SoundEffect backgroundMusicEffect = Content.Load<SoundEffect>("backgroundMusic");
             backgroundMusic = backgroundMusicEffect.CreateInstance();
             backgroundMusic.IsLooped = true;
             //backgroundMusic.Play();
 
+            // load other sound
+            shoot = Content.Load<SoundEffect>("shotgun");
+
             // Load the background content
             background = Content.Load<Texture2D>("background0");
+            instructionBackground = Content.Load<Texture2D>("MenuBackground");
             mainFrame = new Rectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
             // Create a snowflake object
@@ -154,95 +166,110 @@ namespace ChristmasGift
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
-
-            // Cursor update
-            cursorPos = new Vector2(Mouse.GetState().X - cursorTex.Width/2, Mouse.GetState().Y - cursorTex.Height/2);
-
-            // Updating the snowflake
-            foreach (Snowflakes snowflake in snowflakes)
+            
+            if (state == GameState.MainMenu)
             {
-                snowflake.Update();
+                // Update main menu
+                mainMenu.Update(Mouse.GetState());
+                // Cursor update
+                cursorPos = new Vector2(Mouse.GetState().X - cursorTex.Width / 2, Mouse.GetState().Y - cursorTex.Height / 2);
             }
-
-            // Christmas stuff update
-            foreach (ChristmasStuff stuff in christmasStuffs)
+            else if (state == GameState.Play)
             {
-                stuff.Update();
-            }
+                // Cursor update
+                cursorPos = new Vector2(Mouse.GetState().X - cursorTex.Width / 2, Mouse.GetState().Y - cursorTex.Height / 2);
 
-            // Students update
-            foreach (Student student in students)
-            {
-                student.Update();                
-            }
-
-            // spawn snowflake as appopriate
-            elapsedSpawnMilliseconds += gameTime.ElapsedGameTime.Milliseconds;
-            if (elapsedSpawnMilliseconds >= TOTAL_SPAWN_MILLISECONDS)
-            {
-                elapsedSpawnMilliseconds = 0;
-
-                // Added a new constructor for providing sprite and velocity
-                snowflakes.Add(new Snowflakes(snowflakeSprite, rand.Next(WINDOW_WIDTH  - snowflakeSprite.Width + 1),
-                    -snowflakeSprite.Height / 2,
-                    new Vector2(0, SNOWFLAKE_SPEED),
-                    WINDOW_WIDTH,
-                    WINDOW_HEIGHT));
-
-                // Added a new constructor for christmas stuff
-                christmasStuffs.Add(new ChristmasStuff(Content.Load<Texture2D>("stuff" + rand.Next(NUM_STUFF)), rand.Next(WINDOW_WIDTH - christmasTexture.Width),
-                    -christmasTexture.Height / 2,
-                    new Vector2(0, STUFF_SPEED),
-                    WINDOW_WIDTH, WINDOW_HEIGHT));
-
-                students.Add(new Student(Content.Load<Texture2D>("lady" + rand.Next(NUM_STUDENT)), rand.Next(WINDOW_WIDTH - studentTexture.Width),
-                    studentTexture.Height / 2,
-                    new Vector2(0, STUDENT_SPEED),
-                    WINDOW_WIDTH,
-                    WINDOW_HEIGHT));
-            }
-
-            // check for snowflakes leaving window
-            foreach (Snowflakes snowflake in snowflakes)
-            {
-                if (snowflake.CollisionRectangle.Top > WINDOW_HEIGHT)
+                // Updating the snowflake
+                foreach (Snowflakes snowflake in snowflakes)
                 {
-                    snowflake.Active = false;
-                } 
-            }
+                    snowflake.Update();
+                }
 
-
-            // check for stuff leaving window
-            foreach (ChristmasStuff stuff in christmasStuffs)
-            {
-                if (stuff.CollisionRectangle.Top > WINDOW_HEIGHT)
+                // Christmas stuff update
+                foreach (ChristmasStuff stuff in christmasStuffs)
                 {
-                    stuff.Active = false;
+                    stuff.Update();
+                }
+
+                // Students update
+                foreach (Student student in students)
+                {
+                    student.Update();
+                }
+
+                // spawn snowflake as appopriate
+                elapsedSpawnMilliseconds += gameTime.ElapsedGameTime.Milliseconds;
+                if (elapsedSpawnMilliseconds >= TOTAL_SPAWN_MILLISECONDS)
+                {
+                    elapsedSpawnMilliseconds = 0;
+
+                    // Added a new constructor for providing sprite and velocity
+                    snowflakes.Add(new Snowflakes(snowflakeSprite, rand.Next(WINDOW_WIDTH - snowflakeSprite.Width + 1),
+                        -snowflakeSprite.Height / 2,
+                        new Vector2(0, SNOWFLAKE_SPEED),
+                        WINDOW_WIDTH,
+                        WINDOW_HEIGHT));
+
+                    // Added a new constructor for christmas stuff
+                    christmasStuffs.Add(new ChristmasStuff(Content.Load<Texture2D>("stuff" + rand.Next(NUM_STUFF)), rand.Next(WINDOW_WIDTH - christmasTexture.Width),
+                        -christmasTexture.Height / 2,
+                        new Vector2(0, STUFF_SPEED),
+                        WINDOW_WIDTH, WINDOW_HEIGHT));
+
+                    students.Add(new Student(Content.Load<Texture2D>("lady" + rand.Next(NUM_STUDENT)), rand.Next(WINDOW_WIDTH - studentTexture.Width),
+                        studentTexture.Height / 2,
+                        new Vector2(0, STUDENT_SPEED),
+                        WINDOW_WIDTH,
+                        WINDOW_HEIGHT));
+                }
+
+                // check for snowflakes leaving window
+                foreach (Snowflakes snowflake in snowflakes)
+                {
+                    if (snowflake.CollisionRectangle.Top > WINDOW_HEIGHT)
+                    {
+                        snowflake.Active = false;
+                    }
+                }
+
+
+                // check for stuff leaving window
+                foreach (ChristmasStuff stuff in christmasStuffs)
+                {
+                    if (stuff.CollisionRectangle.Top > WINDOW_HEIGHT)
+                    {
+                        stuff.Active = false;
+                    }
+                }
+
+                // check for student leaving window
+                foreach (Student student in students)
+                {
+                    if (student.CollisionRectangle.Top > WINDOW_HEIGHT)
+                    {
+                        student.Active = false;
+                    }
+                }
+
+
+                // check if the student is tracked, than shoot
+                MouseState currentMouseState = Mouse.GetState();
+
+                // kod czy myszka znajduje siê na studentce, jeœli tak 
+                // sprawdzamy czy jest wciœniêty lewy klawisz myszki
+                // studentka umiera - mo¿na zostawiæ œlad po kuli, sygna³ dŸwiêkowy i znika z ekranu
+                foreach (Student student in students)
+                {
+                    if (student.ShootDown(gameTime, currentMouseState))
+                    {
+                        student.Active = false;
+                        shoot.Play();
+                    }
                 }
             }
-
-            // check for student leaving window
-            foreach (Student student in students)
+            else
             {
-                if (student.CollisionRectangle.Top > WINDOW_HEIGHT)
-                {
-                    student.Active = false;
-                }
-            }
-
-
-            // check if the student is tracked, than shoot
-            MouseState currentMouseState = Mouse.GetState();
-
-            // kod czy myszka znajduje siê na studentce, jeœli tak 
-            // sprawdzamy czy jest wciœniêty lewy klawisz myszki
-            // studentka umiera - mo¿na zostawiæ œlad po kuli, sygna³ dŸwiêkowy i znika z ekranu
-            foreach (Student student in students)
-            {
-                if (student.ShootDown(gameTime, currentMouseState))
-                {
-                    student.Active = false;
-                }
+                this.Exit();
             }
 
             base.Update(gameTime);
@@ -254,26 +281,40 @@ namespace ChristmasGift
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.White);
+            GraphicsDevice.Clear(Color.MidnightBlue);
 
             // Drawing background and snowflakes
             spriteBatch.Begin();
 
-            spriteBatch.Draw(background, mainFrame, Color.White);
-
-            foreach (Snowflakes snowflake in snowflakes)
+            if (state == GameState.MainMenu)
             {
-                snowflake.Draw(spriteBatch);
+                // draw the menu
+                //spriteBatch.Draw(instructionBackground, mainFrame, Color.White);
+                mainMenu.Draw(spriteBatch);
+           
             }
-
-            foreach (ChristmasStuff stuff in christmasStuffs)
+            else if (state == GameState.Instruction)
             {
-                stuff.Draw(spriteBatch);
+
             }
-
-            foreach (Student student in students)
+            else if (state == GameState.Play)
             {
-                student.Draw(spriteBatch);
+                spriteBatch.Draw(background, mainFrame, Color.White);
+
+                foreach (Snowflakes snowflake in snowflakes)
+                {
+                    snowflake.Draw(spriteBatch);
+                }
+
+                foreach (ChristmasStuff stuff in christmasStuffs)
+                {
+                    stuff.Draw(spriteBatch);
+                }
+
+                foreach (Student student in students)
+                {
+                    student.Draw(spriteBatch);
+                }
             }
 
             spriteBatch.End();
@@ -289,6 +330,15 @@ namespace ChristmasGift
         private Rectangle GetRandomDrawRectangle(Texture2D sprite)
         {
             return new Rectangle(rand.Next(0, WINDOW_WIDTH), 0, sprite.Width, sprite.Height);
+        }
+
+        /// <summary>
+        /// Changes the state of the game
+        /// </summary>
+        /// <param name="newState">the new game state</param>
+        public static void ChangeState(GameState newState)
+        {
+            state = newState;
         }
     }
 }

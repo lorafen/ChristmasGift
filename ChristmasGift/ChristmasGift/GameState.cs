@@ -11,6 +11,7 @@ namespace ChristmasGift
     public enum GameState
     {
         MainMenu,
+        Instruction,
         Play,
         Quit
     }
