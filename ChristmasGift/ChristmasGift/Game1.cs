@@ -26,7 +26,7 @@ namespace ChristmasGift
         const int WINDOW_HEIGHT = 600;
 
         // background texture
-        Texture2D background, instructionBackground;
+        Texture2D background, menuBackground, instructionBackground;
         Rectangle mainFrame;
 
         // constant values - types of snowflakes
@@ -70,7 +70,7 @@ namespace ChristmasGift
         static GameState state;
 
         // menu
-        Menu mainMenu;
+        Menu mainMenu, instructionSite;
 
         public Game1()
         {
@@ -108,6 +108,7 @@ namespace ChristmasGift
 
             // initialize menu object
             mainMenu = new Menu(Content, WINDOW_WIDTH, WINDOW_HEIGHT);
+            instructionSite = new Menu(Content, WINDOW_WIDTH, WINDOW_HEIGHT);
 
             // load and start playing background music
             SoundEffect backgroundMusicEffect = Content.Load<SoundEffect>("backgroundMusic");
@@ -120,7 +121,8 @@ namespace ChristmasGift
 
             // Load the background content
             background = Content.Load<Texture2D>("background0");
-            instructionBackground = Content.Load<Texture2D>("MenuBackground");
+            menuBackground = Content.Load<Texture2D>("background1");
+            instructionBackground = Content.Load<Texture2D>("background3");
             mainFrame = new Rectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
             // Create a snowflake object
@@ -166,6 +168,19 @@ namespace ChristmasGift
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
+
+            // From instruction site to game
+            KeyboardState kbState = Keyboard.GetState();
+            if ((state == GameState.Instruction) &&
+                (kbState.IsKeyDown(Keys.Enter)))
+            {
+                state = GameState.Play;
+            }
+
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+            {
+                Exit();
+            }
             
             if (state == GameState.MainMenu)
             {
@@ -173,6 +188,13 @@ namespace ChristmasGift
                 mainMenu.Update(Mouse.GetState());
                 // Cursor update
                 cursorPos = new Vector2(Mouse.GetState().X - cursorTex.Width / 2, Mouse.GetState().Y - cursorTex.Height / 2);
+            }
+            else if (state == GameState.Instruction)
+            {
+                // Update menu
+                instructionSite.Update(Mouse.GetState());
+                // mainMenu.Update(Mouse.GetState());
+
             }
             else if (state == GameState.Play)
             {
@@ -289,16 +311,18 @@ namespace ChristmasGift
             if (state == GameState.MainMenu)
             {
                 // draw the menu
-                //spriteBatch.Draw(instructionBackground, mainFrame, Color.White);
+                spriteBatch.Draw(menuBackground, mainFrame, Color.White);
                 mainMenu.Draw(spriteBatch);
-           
+
             }
             else if (state == GameState.Instruction)
             {
-
+                spriteBatch.Draw(instructionBackground, mainFrame, Color.White);
+                
             }
             else if (state == GameState.Play)
             {
+
                 spriteBatch.Draw(background, mainFrame, Color.White);
 
                 foreach (Snowflakes snowflake in snowflakes)

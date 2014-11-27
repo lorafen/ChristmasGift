@@ -20,7 +20,7 @@ namespace ChristmasGift
 
         // fields for button image
         Texture2D sprite;
-        const int IMAGES_PER_ROW = 1;
+        const int IMAGES_PER_ROW = 2;
         int buttonWidth;
 
         // fields for drawing

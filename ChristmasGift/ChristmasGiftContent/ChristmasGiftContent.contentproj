@@ -144,6 +144,18 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MenuBackground.jpg">
+      <Name>MenuBackground</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="instructionButton.png">
+      <Name>instructionButton</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
     <Compile Include="playButton.png">
       <Name>playButton</Name>
       <Importer>TextureImporter</Importer>
@@ -156,15 +168,20 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MenuBackground.jpg">
-      <Name>MenuBackground</Name>
+    <Compile Include="background1.jpg">
+      <Name>background1</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="background2.jpg">
+      <Name>background2</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="instructionButton.png">
-      <Name>instructionButton</Name>
+    <Compile Include="background3.png">
+      <Name>background3</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>

@@ -27,13 +27,13 @@ namespace ChristmasGift
         public Menu(ContentManager contentManager, int windowWidth, int windowHeight)
         {
             // Button placement
-            int centerX = windowWidth / 2;
+            int centerX = windowWidth / 4;
             int topCenterY = windowHeight / 6;
             Vector2 buttonCenter = new Vector2(centerX, topCenterY);
 
             // Create buttons
             instructionButton = new MenuButton(contentManager, contentManager.Load<Texture2D>("instructionButton"),
-                buttonCenter, GameState.MainMenu);
+                buttonCenter, GameState.Instruction);
             buttonCenter.Y += windowHeight / 3;
             
             playButton = new MenuButton(contentManager, contentManager.Load<Texture2D>("playbutton"),
