@@ -40,7 +40,7 @@ namespace ChristmasGift
 
         // snowflake spawn support
         const float SNOWFLAKE_SPEED = 0.2F;
-        const int TOTAL_SPAWN_MILLISECONDS = 2000;
+        const int TOTAL_SPAWN_MILLISECONDS = 3000;
         int elapsedSpawnMilliseconds = 0;
 
         // background music
@@ -57,13 +57,13 @@ namespace ChristmasGift
         List<ChristmasStuff> christmasStuffs = new List<ChristmasStuff>();
         Texture2D christmasTexture;
         string baseSpriteName;
-        const float STUFF_SPEED = 0.3F;
+        float STUFF_SPEED = 0.3F;
         const int NUM_STUFF = 9;
 
         List<Student> students = new List<Student>();
         Texture2D studentTexture;
         string studentName;
-        const float STUDENT_SPEED = 0.4F;
+        float STUDENT_SPEED = 0.3F;
         const int NUM_STUDENT = 4;
 
         // field to keep track of game state
@@ -71,6 +71,16 @@ namespace ChristmasGift
 
         // menu
         Menu mainMenu, instructionSite;
+
+        // Font
+        SpriteFont font;
+        const string SCORE_PREFIX = "Score: ";
+        const int DISPLAY_OFFSET = 35;
+        public static readonly Vector2 SCORE_LOCATION = 
+            new Vector2(DISPLAY_OFFSET, DISPLAY_OFFSET);
+        int score = 0;
+        const int STUDENT_SCORE = 10;
+        const int GIFT_SCORE = 5;
 
         public Game1()
         {
@@ -147,6 +157,9 @@ namespace ChristmasGift
 
             students.Add(new Student(Content, studentName, rand.Next(0, WINDOW_WIDTH),
                 rand.Next(0, WINDOW_HEIGHT), WINDOW_WIDTH, WINDOW_HEIGHT)); 
+
+            // Load sprite font
+            font = Content.Load<SpriteFont>("Arial");
         }
 
         /// <summary>
@@ -254,7 +267,6 @@ namespace ChristmasGift
                     }
                 }
 
-
                 // check for stuff leaving window
                 foreach (ChristmasStuff stuff in christmasStuffs)
                 {
@@ -273,7 +285,6 @@ namespace ChristmasGift
                     }
                 }
 
-
                 // check if the student is tracked, than shoot
                 MouseState currentMouseState = Mouse.GetState();
 
@@ -285,14 +296,44 @@ namespace ChristmasGift
                     if (student.ShootDown(gameTime, currentMouseState))
                     {
                         student.Active = false;
-                        shoot.Play();
+                        //shoot.Play();
+                        
                     }
+                }
+
+                foreach (ChristmasStuff stuff in christmasStuffs)
+                {
+                    if (stuff.ShootDown(gameTime, currentMouseState))
+                    {
+                        stuff.Active = false;
+                        score -= GIFT_SCORE;
+                    }
+                }
+
+                for (int i = 0; i < students.Count; i++)
+                {
+                    if (students[i].ShootDown(gameTime, currentMouseState))
+                    {
+                        score += STUDENT_SCORE;
+                    }
+                }
+                
+                // Let's make it harder
+                if (score % 100 == 0)
+                {
+                    STUFF_SPEED += 0.05f;
+                    STUDENT_SPEED += 0.05f;
+                    //TOTAL_SPAWN_MILLISECONDS -= 10;
                 }
             }
             else
             {
                 this.Exit();
             }
+
+            // clean out inactive students and christmas items
+            students.RemoveAll(item => item.Active == false);
+            christmasStuffs.RemoveAll(item => item.Active == false);
 
             base.Update(gameTime);
         }
@@ -325,6 +366,9 @@ namespace ChristmasGift
 
                 spriteBatch.Draw(background, mainFrame, Color.White);
 
+                // draw score
+                spriteBatch.DrawString(font, SCORE_PREFIX + score, SCORE_LOCATION, Color.White);
+
                 foreach (Snowflakes snowflake in snowflakes)
                 {
                     snowflake.Draw(spriteBatch);
@@ -344,9 +388,12 @@ namespace ChristmasGift
             spriteBatch.End();
 
             // Drawing cursor
-            cursorSprite.Begin();
-            cursorSprite.Draw(cursorTex, cursorPos, Color.White);
-            cursorSprite.End();
+            if (state != GameState.Instruction)
+            {
+                cursorSprite.Begin();
+                cursorSprite.Draw(cursorTex, cursorPos, Color.White);
+                cursorSprite.End();
+            }
 
             base.Draw(gameTime);
         }
