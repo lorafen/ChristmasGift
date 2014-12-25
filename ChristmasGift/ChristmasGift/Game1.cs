@@ -9,6 +9,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 
+using Microsoft.Xna.Framework.Input;
+
 namespace ChristmasGift
 {
     /// <summary>
@@ -26,7 +28,8 @@ namespace ChristmasGift
         const int WINDOW_HEIGHT = 600;
 
         // background texture
-        Texture2D background, menuBackground, instructionBackground;
+        Texture2D background, menuBackground, instructionBackground, userBackground, endBackground;
+        Texture2D audioOn, audioOff;
         Rectangle mainFrame;
 
         // constant values - types of snowflakes
@@ -63,24 +66,32 @@ namespace ChristmasGift
         List<Student> students = new List<Student>();
         Texture2D studentTexture;
         string studentName;
-        float STUDENT_SPEED = 0.3F;
+        float STUDENT_SPEED = 1.0F;
         const int NUM_STUDENT = 4;
+        int DISPLAY_STUDENT_NUM = 1;
 
         // field to keep track of game state
         static GameState state;
 
         // menu
-        Menu mainMenu, instructionSite;
+        Menu mainMenu, instructionSite, userSite, endSite;
 
         // Font
-        SpriteFont font;
+        SpriteFont font, endFont;
         const string SCORE_PREFIX = "Score: ";
         const int DISPLAY_OFFSET = 35;
         public static readonly Vector2 SCORE_LOCATION = 
             new Vector2(DISPLAY_OFFSET, DISPLAY_OFFSET);
         int score = 0;
-        const int STUDENT_SCORE = 10;
-        const int GIFT_SCORE = 5;
+        const int STUDENT_SCORE = 20;
+        const int GIFT_SCORE = 10;
+        const int MAX_SCORE = 1000;
+
+        // Visibility of shoot cursor
+        bool visibilityOfMouse = true;
+
+        // Active sound variable
+        bool soundOn = true;
 
         public Game1()
         {
@@ -119,12 +130,18 @@ namespace ChristmasGift
             // initialize menu object
             mainMenu = new Menu(Content, WINDOW_WIDTH, WINDOW_HEIGHT);
             instructionSite = new Menu(Content, WINDOW_WIDTH, WINDOW_HEIGHT);
+            //userSite = new Menu(Content, WINDOW_WIDTH, WINDOW_HEIGHT);
+            endSite = new Menu(Content, WINDOW_WIDTH, WINDOW_HEIGHT);
 
             // load and start playing background music
             SoundEffect backgroundMusicEffect = Content.Load<SoundEffect>("backgroundMusic");
             backgroundMusic = backgroundMusicEffect.CreateInstance();
             backgroundMusic.IsLooped = true;
-            //backgroundMusic.Play();
+
+            if (soundOn == true)
+            {
+                backgroundMusic.Play();
+            }
 
             // load other sound
             shoot = Content.Load<SoundEffect>("shotgun");
@@ -133,6 +150,12 @@ namespace ChristmasGift
             background = Content.Load<Texture2D>("background0");
             menuBackground = Content.Load<Texture2D>("background1");
             instructionBackground = Content.Load<Texture2D>("background3");
+            userBackground = Content.Load<Texture2D>("background4");
+            endBackground = Content.Load<Texture2D>("background5");
+
+            audioOn = Content.Load<Texture2D>("audioOn");
+            audioOff = Content.Load<Texture2D>("audioOff");
+
             mainFrame = new Rectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
             // Create a snowflake object
@@ -160,6 +183,7 @@ namespace ChristmasGift
 
             // Load sprite font
             font = Content.Load<SpriteFont>("Arial");
+            endFont = Content.Load<SpriteFont>("Copperplate");
         }
 
         /// <summary>
@@ -188,6 +212,7 @@ namespace ChristmasGift
                 (kbState.IsKeyDown(Keys.Enter)))
             {
                 state = GameState.Play;
+                //kbState.GetPressedKeys()
             }
 
             if (Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -207,7 +232,18 @@ namespace ChristmasGift
                 // Update menu
                 instructionSite.Update(Mouse.GetState());
                 // mainMenu.Update(Mouse.GetState());
+            }
+            else if (state == GameState.User)
+            {
+                if (kbState.IsKeyDown(Keys.Enter))
+                {
+                    state = GameState.Play;
+                }
 
+                if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+                {
+                    Exit();
+                }
             }
             else if (state == GameState.Play)
             {
@@ -244,18 +280,35 @@ namespace ChristmasGift
                         new Vector2(0, SNOWFLAKE_SPEED),
                         WINDOW_WIDTH,
                         WINDOW_HEIGHT));
+                }
+
+                // spawn christmas items
+                elapsedSpawnMilliseconds += gameTime.ElapsedGameTime.Milliseconds;
+                if (elapsedSpawnMilliseconds >= TOTAL_SPAWN_MILLISECONDS)
+                {
+                    elapsedSpawnMilliseconds = 0;
 
                     // Added a new constructor for christmas stuff
                     christmasStuffs.Add(new ChristmasStuff(Content.Load<Texture2D>("stuff" + rand.Next(NUM_STUFF)), rand.Next(WINDOW_WIDTH - christmasTexture.Width),
                         -christmasTexture.Height / 2,
                         new Vector2(0, STUFF_SPEED),
                         WINDOW_WIDTH, WINDOW_HEIGHT));
+                }
 
-                    students.Add(new Student(Content.Load<Texture2D>("lady" + rand.Next(NUM_STUDENT)), rand.Next(WINDOW_WIDTH - studentTexture.Width),
-                        studentTexture.Height / 2,
+                // spawn students
+                elapsedSpawnMilliseconds += gameTime.ElapsedGameTime.Milliseconds;
+                if (elapsedSpawnMilliseconds >= TOTAL_SPAWN_MILLISECONDS)
+                {
+                    elapsedSpawnMilliseconds = 0;
+
+                    for (int i = 0; i < DISPLAY_STUDENT_NUM; i++)
+                    {
+                        students.Add(new Student(Content.Load<Texture2D>("lady" + rand.Next(NUM_STUDENT)), rand.Next(0, WINDOW_WIDTH - studentTexture.Width),
+                        rand.Next(0, WINDOW_HEIGHT - studentTexture.Height / 2),
                         new Vector2(0, STUDENT_SPEED),
                         WINDOW_WIDTH,
                         WINDOW_HEIGHT));
+                    }  
                 }
 
                 // check for snowflakes leaving window
@@ -296,8 +349,10 @@ namespace ChristmasGift
                     if (student.ShootDown(gameTime, currentMouseState))
                     {
                         student.Active = false;
-                        //shoot.Play();
-                        
+                        if (soundOn == true)
+                        {
+                            shoot.Play();
+                        }
                     }
                 }
 
@@ -317,14 +372,37 @@ namespace ChristmasGift
                         score += STUDENT_SCORE;
                     }
                 }
-                
+
+                int full_value = score/100;
                 // Let's make it harder
-                if (score % 100 == 0)
+                if (full_value > 0) 
                 {
-                    STUFF_SPEED += 0.05f;
-                    STUDENT_SPEED += 0.05f;
-                    //TOTAL_SPAWN_MILLISECONDS -= 10;
+                    int old_display_num = DISPLAY_STUDENT_NUM;
+                    DISPLAY_STUDENT_NUM = full_value + 1;
+
+                    if (old_display_num != DISPLAY_STUDENT_NUM)
+                    {
+                        STUDENT_SPEED += 1.0f;
+                    }
+                    
                 }
+
+                // finish the game if your score is about 1000
+                if (score >= MAX_SCORE)
+                {
+                    state = GameState.EndGame;
+                }
+
+                // extra option
+                if (Keyboard.GetState().IsKeyDown(Keys.A))
+                {
+                    state = GameState.EndGame;
+                }
+            }
+            else if (state == GameState.EndGame)
+            {
+                visibilityOfMouse = false;
+                endSite.Update(Mouse.GetState());
             }
             else
             {
@@ -359,16 +437,23 @@ namespace ChristmasGift
             else if (state == GameState.Instruction)
             {
                 spriteBatch.Draw(instructionBackground, mainFrame, Color.White);
-                
             }
+            //else if (state == GameState.User)
+            //{
+            //    // write user name
+            //    spriteBatch.Draw(userBackground, mainFrame, Color.White);
+                
+            //}
             else if (state == GameState.Play)
             {
-
                 spriteBatch.Draw(background, mainFrame, Color.White);
 
                 // draw score
                 spriteBatch.DrawString(font, SCORE_PREFIX + score, SCORE_LOCATION, Color.White);
+                //spriteBatch.DrawString(font, SCORE_PREFIX + DISPLAY_STUDENT_NUM, new Vector2(DISPLAY_OFFSET, DISPLAY_OFFSET + 30), Color.White);
 
+
+                // -------------------------------------- //
                 foreach (Snowflakes snowflake in snowflakes)
                 {
                     snowflake.Draw(spriteBatch);
@@ -384,6 +469,19 @@ namespace ChristmasGift
                     student.Draw(spriteBatch);
                 }
             }
+            else if (state == GameState.EndGame)
+            {
+                spriteBatch.Draw(endBackground, mainFrame, Color.White);
+                spriteBatch.DrawString(endFont, "The End", SCORE_LOCATION, Color.White);
+
+                string output = "Your score is ";
+                // find the center of the string
+                Vector2 FontOrgin = endFont.MeasureString(output);
+                spriteBatch.DrawString(endFont, output + score, new Vector2(600,500), Color.White, 0.0f, FontOrgin, 0.5f, SpriteEffects.None, 0.0f);
+                spriteBatch.DrawString(endFont, "Press <ESC> to close the window", new Vector2(200, 600), Color.White, 0.0f, FontOrgin, 0.25f, SpriteEffects.None, 0.0f);
+            }
+
+            Sound();
 
             spriteBatch.End();
 
@@ -391,7 +489,10 @@ namespace ChristmasGift
             if (state != GameState.Instruction)
             {
                 cursorSprite.Begin();
-                cursorSprite.Draw(cursorTex, cursorPos, Color.White);
+                if (visibilityOfMouse == true)
+                {
+                    cursorSprite.Draw(cursorTex, cursorPos, Color.White);
+                }
                 cursorSprite.End();
             }
 
@@ -410,6 +511,32 @@ namespace ChristmasGift
         public static void ChangeState(GameState newState)
         {
             state = newState;
+        }
+
+        public void Sound()
+        {
+            MouseState currentMouse = Mouse.GetState();
+
+            // picture of sound
+            if ((state == GameState.MainMenu) || (state == GameState.Instruction) || (state == GameState.Play))
+            {
+                if (soundOn == true)
+                {
+                    spriteBatch.Draw(audioOn, new Vector2(720, 10), Color.White);
+                }
+                else
+                {
+                    spriteBatch.Draw(audioOff, new Vector2(720, 10), Color.White);
+                }
+            }
+
+            // let's add some action
+            if ((currentMouse.X > (720 - audioOn.Width) ) && (currentMouse.X < (720 + audioOn.Width) ) &&
+                (currentMouse.Y > (10 - audioOn.Height)) && (currentMouse.Y < (10 + audioOn.Height)) &&
+                currentMouse.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
+            {
+                soundOn = !soundOn;
+            }
         }
     }
 }

@@ -12,7 +12,9 @@ namespace ChristmasGift
     {
         MainMenu,
         Instruction,
+        User,
         Play,
+        EndGame,
         Quit
     }
 }
