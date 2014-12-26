@@ -138,10 +138,14 @@ namespace ChristmasGift
             backgroundMusic = backgroundMusicEffect.CreateInstance();
             backgroundMusic.IsLooped = true;
 
-            if (soundOn == true)
-            {
-                backgroundMusic.Play();
-            }
+            //if (soundOn == true)
+            //{
+            //    backgroundMusic.Play();
+            //}
+            //else
+            //{
+            //    backgroundMusic.Dispose();
+            //}
 
             // load other sound
             shoot = Content.Load<SoundEffect>("shotgun");
@@ -205,6 +209,18 @@ namespace ChristmasGift
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
+
+            // Sound
+            MouseState currentMouse = Mouse.GetState();
+
+            // let's add some action
+            if ((currentMouse.X > (720 - audioOn.Width)) && (currentMouse.X < (720 + audioOn.Width)) &&
+                (currentMouse.Y > (10 - audioOn.Height)) && (currentMouse.Y < (10 + audioOn.Height)) &&
+                currentMouse.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
+            {
+                soundOn = !soundOn;
+            }
+            
 
             // From instruction site to game
             KeyboardState kbState = Keyboard.GetState();
@@ -353,6 +369,8 @@ namespace ChristmasGift
                         {
                             shoot.Play();
                         }
+                        score += STUDENT_SCORE;
+                       
                     }
                 }
 
@@ -362,14 +380,6 @@ namespace ChristmasGift
                     {
                         stuff.Active = false;
                         score -= GIFT_SCORE;
-                    }
-                }
-
-                for (int i = 0; i < students.Count; i++)
-                {
-                    if (students[i].ShootDown(gameTime, currentMouseState))
-                    {
-                        score += STUDENT_SCORE;
                     }
                 }
 
@@ -515,28 +525,23 @@ namespace ChristmasGift
 
         public void Sound()
         {
-            MouseState currentMouse = Mouse.GetState();
-
             // picture of sound
             if ((state == GameState.MainMenu) || (state == GameState.Instruction) || (state == GameState.Play))
             {
                 if (soundOn == true)
                 {
                     spriteBatch.Draw(audioOn, new Vector2(720, 10), Color.White);
+                    backgroundMusic.Play();
+                    
                 }
                 else
                 {
                     spriteBatch.Draw(audioOff, new Vector2(720, 10), Color.White);
+                    backgroundMusic.Pause();
                 }
             }
 
-            // let's add some action
-            if ((currentMouse.X > (720 - audioOn.Width) ) && (currentMouse.X < (720 + audioOn.Width) ) &&
-                (currentMouse.Y > (10 - audioOn.Height)) && (currentMouse.Y < (10 + audioOn.Height)) &&
-                currentMouse.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
-            {
-                soundOn = !soundOn;
-            }
+            
         }
     }
 }
